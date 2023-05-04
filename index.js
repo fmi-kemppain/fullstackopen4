@@ -12,12 +12,11 @@ const usersRouter = require('./controllers/usersRouter')
 
 mongoose.connect(process.env.MONGO_URL)
 
-app.use(middleware.tokenExtractor)
 app.use(cors())
 app.use(express.json())
 app.use('/api/login', loginRouter)
-app.use('/api/blogs', blogsRouter)
-app.use('/api/users', usersRouter)
+app.use('/api/blogs', middleware.userExtractor, middleware.tokenExtractor, blogsRouter)
+app.use('/api/users', middleware.tokenExtractor, usersRouter)
 
 app.use(middleware.errorHandler)
 

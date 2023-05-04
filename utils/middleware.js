@@ -13,21 +13,34 @@ const errorHandler = (error, request, response, next) => {
 
 const tokenExtractor = async (request, response, next) => {
     
-    if (request.path !== '/api/login') {
-        const authorization = request.get('authorization')
+    const authorization = request.get('authorization')
 
-        if (!authorization) {
-            return response.status(401).json({ error: 'authorization missing' })
-        }
-    
-        const bearer = authorization.replace('Bearer ', '')
-        request.token = jwt.verify(bearer, process.env.LOGIN_TOKEN_SECRET)
+    if (!authorization) {
+        return response.status(401).json({ error: 'authorization missing' })
     }
+
+    const bearer = authorization.replace('Bearer ', '')
+    request.token = jwt.verify(bearer, process.env.LOGIN_TOKEN_SECRET)
     
+    next()
+}
+
+const userExtractor = async (request, response, next) => {
+
+    const authorization = request.get('authorization')
+
+    if (!authorization) {
+        return response.status(401).json({ error: 'authorization missing' })
+    }
+
+    const bearer = authorization.replace('Bearer ', '')
+    request.user = jwt.decode(bearer, process.env.LOGIN_TOKEN_SECRET)
+
     next()
 }
 
 module.exports = {
     errorHandler,
     tokenExtractor,
+    userExtractor
 }
