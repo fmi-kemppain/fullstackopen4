@@ -17,32 +17,42 @@ blogsRouter.delete('/:id', async (request, response) => {
     blog.delete();
 })
 
+blogsRouter.put('/:id', async (request, response) => {
+
+    const body = request.body
+
+    const blog = await Blog.findOneAndUpdate({
+        _id: request.params.id
+    },
+    {
+        title: request.body.title,
+        likes: request.body.likes
+    },
+    {
+        new: true
+    })
+
+    response.status(201).json(blog)
+})
+
 blogsRouter.post('/', async (request, response) => {
 
     const body = request.body
 
-    const user = await User.findById(request.body.userId)
+    const author = await User.findById(request.body.author)
 
     const blog = new Blog({
         title: request.body.title,
-        author: user.username
+        author: author.username
     })
 
-    if (body.content === undefined) {
-        return response.status(400).json({ error: 'content missing' })
-    }
-
-    if (!request.token.id) {
-        return response.status(401).json({ error: 'token invalid' })
-    }
-
-    if (request.user.username !== user.username) {
-        return response.status(400).json({ error: 'not your blog' })
+    if (body.title === undefined) {
+        return response.status(400).json({ error: 'title missing' })
     }
 
     savedBlog = await blog.save()
-    user.blogs = user.blogs.concat(savedBlog._id)
-    await user.save()
+    author.blogs = author.blogs.concat(savedBlog._id)
+    await author.save()
 
     response.status(201).json(savedBlog)
 })
